@@ -14,6 +14,10 @@ pub fn read(configuration_file_path: &str) -> Configuration {
         .expect(&error_message)
 }
 
+pub fn configuration_event_initializer() {
+    
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

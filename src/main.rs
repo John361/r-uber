@@ -1,7 +1,7 @@
 mod configuration;
 
 use crate::configuration::configuration::Configuration;
-use crate::configuration::configuration_reader::read;
+use crate::configuration::reader::read;
 
 fn main() {
 
