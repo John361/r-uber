@@ -1,4 +1,10 @@
 {
-    "hello": "world",
-    "foo": "bar"
+    "input": {
+        "path": "./tests/source"
+    },
+    "outputs": [
+        {
+            "path": "./tests/destinations"
+        }
+    ]
 }

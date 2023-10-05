@@ -1,7 +1,17 @@
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize};
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Deserialize, Debug)]
 pub struct Configuration {
-    hello: String,
-    foo: String
+    pub input: ConfigurationInput,
+    pub outputs: Vec<ConfigurationOutput>
+}
+
+#[derive(Deserialize, Debug)]
+pub struct ConfigurationInput {
+    pub path: String
+}
+
+#[derive(Deserialize, Debug)]
+pub struct ConfigurationOutput {
+    pub path: String
 }
