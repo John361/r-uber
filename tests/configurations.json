@@ -1,10 +1,10 @@
 {
     "input": {
-        "path": "./tests/source"
+        "path": "./tests/input"
     },
     "outputs": [
         {
-            "path": "./tests/destinations"
+            "path": "./tests/outputs"
         }
     ]
 }
