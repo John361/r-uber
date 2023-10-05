@@ -14,11 +14,13 @@ pub fn read(configuration_file_path: &str) -> Configuration {
         .expect(&error_message)
 }
 
-// #[cfg(test)]
-// mod tests {
-//     #[test]
-//     fn it_works() {
-//         let result = add(2, 2);
-//         assert_eq!(result, 4);
-//     }
-// }
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn configuration_loaded_and_parsed() {
+        let configuration_path: &str = "./tests/configurations.json";
+        let _configuration: Configuration = read(configuration_path);
+    }
+}
