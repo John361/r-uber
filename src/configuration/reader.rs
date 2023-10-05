@@ -1,5 +1,4 @@
 use std::fs;
-
 use serde_json::{from_str as serde_json_from_str};
 use crate::configuration::configuration::Configuration;
 
@@ -12,10 +11,6 @@ pub fn read(configuration_file_path: &str) -> Configuration {
 
     serde_json_from_str(&content)
         .expect(&error_message)
-}
-
-pub fn configuration_event_initializer() {
-    
 }
 
 #[cfg(test)]
