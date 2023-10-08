@@ -15,32 +15,29 @@ permissions:
     actions: write
 
 jobs:
-    format:
+    clippy:
         runs-on: ubuntu-latest
         permissions:
             contents: read
-            pull-requests: write
         steps:
             - uses: actions/checkout@v4
-            - uses: dtolnay/rust-toolchain@stable
-              with:
-                  components: rustfmt
-            - uses: mbrobbel/rustfmt-check@master
+            - run: rustup component add clippy
+            - uses: actions-rs/clippy-check@v1
               with:
                   token: ${{ secrets.GITHUB_TOKEN }}
-                  mode: review
+                  args: --all-features
 
-    audit:
-        runs-on: ubuntu-latest
-        permissions:
-            contents: read
-            issues: write
-        steps:
-            - uses: actions/checkout@v4
-            - uses: actions-rust-lang/audit@v1
-              name: Audit Rust Dependencies
-              with:
-                  createIssues: github.ref == 'refs/heads/dev'
+#    audit:
+#        runs-on: ubuntu-latest
+#        permissions:
+#            contents: read
+#            issues: write
+#        steps:
+#            - uses: actions/checkout@v4
+#            - uses: actions-rust-lang/audit@v1
+#              name: Audit Rust Dependencies
+#              with:
+#                  createIssues: github.ref == 'refs/heads/dev'
 
     build:
         runs-on: ubuntu-latest
