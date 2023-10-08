@@ -1,5 +1,5 @@
 {
-    "configurations": [
+    "races": [
         {
             "input": {
                 "path": "./tests/input-1"
