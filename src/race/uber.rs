@@ -1,10 +1,5 @@
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 use serde_json::{from_str as serde_json_from_str, to_string as serde_json_to_string};
-
-#[derive(Deserialize, Debug)]
-pub struct Races {
-    pub ubers: Vec<Uber>
-}
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Uber {
@@ -20,14 +15,6 @@ pub struct UberInput {
 #[derive(Serialize, Deserialize, Debug)]
 pub struct UberOutput {
     pub path: String
-}
-
-impl Races {
-
-    pub fn from_string(content: &str) -> Self {
-        serde_json_from_str(content)
-            .expect("Cannot deserialize races")
-    }
 }
 
 impl Uber {
