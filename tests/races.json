@@ -6,10 +6,30 @@
             },
             "outputs": [
                 {
-                    "path": "./tests/output-1"
+                    "sftp": {
+                        "login": "username",
+                        "authenticationMethod": {
+                            "password": "password"
+                        },
+                        "remotePath": "./tests/output-1"
+                    }
                 },
                 {
-                    "path": "./tests/output-3"
+                    "sftp": {
+                        "login": "username",
+                        "authenticationMethod": {
+                            "key": {
+                                "publicKeyPath": "public-key",
+                                "privateKeyPath": "private-key"
+                            }
+                        },
+                        "remotePath": "./tests/output-1"
+                    }
+                },
+                {
+                    "local": {
+                        "path": "./tests/output-3"
+                    }
                 }
             ]
         },
@@ -19,10 +39,14 @@
             },
             "outputs": [
                 {
-                    "path": "./tests/output-2"
+                    "local": {
+                        "path": "./tests/output-2"
+                    }
                 },
                 {
-                    "path": "./tests/output-4"
+                    "local": {
+                        "path": "./tests/output-4"
+                    }
                 }
             ]
         },
@@ -32,7 +56,9 @@
             },
             "outputs": [
                 {
-                    "path": "./tests/output-3"
+                    "local": {
+                        "path": "./tests/output-3"
+                    }
                 }
             ]
         }
