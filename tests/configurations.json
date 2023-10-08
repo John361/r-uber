@@ -1,10 +1,40 @@
 {
-    "input": {
-        "path": "./tests/input"
-    },
-    "outputs": [
+    "configurations": [
         {
-            "path": "./tests/outputs"
+            "input": {
+                "path": "./tests/input-1"
+            },
+            "outputs": [
+                {
+                    "path": "./tests/output-1"
+                },
+                {
+                    "path": "./tests/output-3"
+                }
+            ]
+        },
+        {
+            "input": {
+                "path": "./tests/input-2"
+            },
+            "outputs": [
+                {
+                    "path": "./tests/output-2"
+                },
+                {
+                    "path": "./tests/output-4"
+                }
+            ]
+        },
+        {
+            "input": {
+                "path": "./tests/input-3"
+            },
+            "outputs": [
+                {
+                    "path": "./tests/output-3"
+                }
+            ]
         }
     ]
 }
