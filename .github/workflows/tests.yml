@@ -34,6 +34,7 @@ jobs:
               name: Audit Rust Dependencies
               with:
                   createIssues: github.ref == 'refs/heads/dev'
+                  TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     build:
         runs-on: ubuntu-latest
