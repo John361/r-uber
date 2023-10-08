@@ -3,9 +3,11 @@ use std::time::Duration;
 
 use kafka::client::{KafkaClient, RequiredAcks};
 use kafka::producer::{Producer, Record};
-use notify::{Config, EventKind, INotifyWatcher, RecommendedWatcher, RecursiveMode, Result, Watcher};
 use notify::event::AccessKind::Close;
 use notify::event::AccessMode::Write;
+use notify::{
+    Config, EventKind, INotifyWatcher, RecommendedWatcher, RecursiveMode, Result, Watcher,
+};
 
 use crate::configuration::ConfigKafka;
 use crate::race::races::Races;
@@ -13,11 +15,13 @@ use crate::race::uber::Uber;
 
 pub fn listen_races(kafka_config: &ConfigKafka, races: &Races) {
     let (tx, rx) = std::sync::mpsc::channel();
-    let mut watcher: INotifyWatcher = RecommendedWatcher::new(tx, Config::default())
-        .expect("Cannot create watcher");
+    let mut watcher: INotifyWatcher =
+        RecommendedWatcher::new(tx, Config::default()).expect("Cannot create watcher");
 
     for uber in &races.ubers {
-        watcher.watch(uber.input.path.as_ref(), RecursiveMode::Recursive).unwrap();
+        watcher
+            .watch(uber.input.path.as_ref(), RecursiveMode::Recursive)
+            .unwrap();
     }
 
     loop {
@@ -28,8 +32,7 @@ pub fn listen_races(kafka_config: &ConfigKafka, races: &Races) {
                         let path = event.paths[0].to_str();
 
                         if let Some(uber) = races.has_uber_with_same_input_path(path.unwrap()) {
-                            produce_message(kafka_config, uber)
-                                .expect("TODO: panic message");
+                            produce_message(kafka_config, uber).expect("TODO: panic message");
                         }
                     }
                 }
@@ -50,17 +53,22 @@ fn produce_message(kafka_config: &ConfigKafka, uber: &Uber) -> Result<()> {
         attempt += 1;
 
         {
-            client.load_metadata(&[kafka_config.topic.to_owned()])
+            client
+                .load_metadata(&[kafka_config.topic.to_owned()])
                 .expect("Cannot load metadata");
         }
 
-        if client.topics().partitions(&kafka_config.topic)
+        if client
+            .topics()
+            .partitions(&kafka_config.topic)
             .map(|p| p.len())
-            .unwrap_or(0) > 0 {
+            .unwrap_or(0)
+            > 0
+        {
             break;
         } else if attempt > 2 { // try up to 3 times
-            // return some error
-            // return Err(KafkaError::Kafka(KafkaCode::UnknownTopicOrPartition));
+             // return some error
+             // return Err(KafkaError::Kafka(KafkaCode::UnknownTopicOrPartition));
         }
 
         thread::sleep(Duration::from_secs(1));
@@ -72,12 +80,14 @@ fn produce_message(kafka_config: &ConfigKafka, uber: &Uber) -> Result<()> {
         .create()
         .expect("Cannot create uber producer");
 
-    producer.send(&Record {
-        topic: &kafka_config.topic,
-        partition: -1,
-        key: (),
-        value: uber.to_json_string()
-    }).expect("Cannot send record");
+    producer
+        .send(&Record {
+            topic: &kafka_config.topic,
+            partition: -1,
+            key: (),
+            value: uber.to_json_string(),
+        })
+        .expect("Cannot send record");
 
     Ok(())
 }
