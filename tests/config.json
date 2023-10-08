@@ -1,7 +1,7 @@
 {
     "racesPath": "./tests/races.json",
     "kafka": {
-        "hosts": ["localhost:9092"],
+        "hosts": ["localhost:9094"],
         "topic": "uber-race"
     }
 }
