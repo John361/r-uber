@@ -8,15 +8,21 @@
                 {
                     "sftp": {
                         "login": "username",
-                        "password": "password",
+                        "authenticationMethod": {
+                            "password": "password"
+                        },
                         "remotePath": "./tests/output-1"
                     }
                 },
                 {
                     "sftp": {
                         "login": "username",
-                        "publicKeyPath": "public-key",
-                        "privateKeyPath": "private-key",
+                        "authenticationMethod": {
+                            "key": {
+                                "publicKeyPath": "public-key",
+                                "privateKeyPath": "private-key"
+                            }
+                        },
                         "remotePath": "./tests/output-1"
                     }
                 },
