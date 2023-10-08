@@ -29,8 +29,7 @@ impl Races {
 
     pub fn has_uber_with_same_input_path(&self, other_path: &str) -> Option<&Uber> {
         self.ubers.iter()
-            .filter(|uber| uber.input.is_same_path(other_path))
-            .next()
+            .find(|uber| uber.input.is_same_path(other_path))
     }
 }
 

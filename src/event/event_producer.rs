@@ -23,9 +23,7 @@ pub fn listen_races(kafka_config: &ConfigKafka, races: &Races) {
     loop {
         match rx.recv() {
             Ok(event_result) => {
-                if event_result.is_ok() {
-                    let event = event_result.unwrap();
-
+                if let Ok(event) = event_result {
                     if event.kind == EventKind::Access(Close(Write)) {
                         let path = event.paths[0].to_str();
 
@@ -50,8 +48,11 @@ fn produce_message(kafka_config: &ConfigKafka, uber: &Uber) -> Result<()> {
 
     loop {
         attempt += 1;
-        let _ = client.load_metadata(&[kafka_config.topic.to_owned()])
-            .expect("Cannot load metadata");
+
+        {
+            client.load_metadata(&[kafka_config.topic.to_owned()])
+                .expect("Cannot load metadata");
+        }
 
         if client.topics().partitions(&kafka_config.topic)
             .map(|p| p.len())
@@ -75,7 +76,7 @@ fn produce_message(kafka_config: &ConfigKafka, uber: &Uber) -> Result<()> {
         topic: &kafka_config.topic,
         partition: -1,
         key: (),
-        value: uber.to_string()
+        value: uber.to_json_string()
     }).expect("Cannot send record");
 
     Ok(())

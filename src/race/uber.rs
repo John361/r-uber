@@ -12,12 +12,12 @@ pub struct Uber {
 
 impl Uber {
 
-    pub fn to_string(&self) -> String {
+    pub fn to_json_string(&self) -> String {
         serde_json_to_string(self)
             .expect("Cannot serialize uber")
     }
 
-    pub fn from_string(content: &str) -> Self {
+    pub fn from_json_string(content: &str) -> Self {
         serde_json_from_str(content)
             .expect("Cannot deserialize uber")
     }
