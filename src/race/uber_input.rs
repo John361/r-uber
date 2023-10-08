@@ -2,11 +2,10 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct UberInput {
-    pub path: String
+    pub path: String,
 }
 
 impl UberInput {
-
     pub fn is_same_path(&self, other_path: &str) -> bool {
         other_path.contains(&self.path)
     }
@@ -18,7 +17,7 @@ mod tests {
 
     fn simple_instance() -> UberInput {
         UberInput {
-            path: "some/relative/path".to_string()
+            path: "some/relative/path".to_string(),
         }
     }
 
