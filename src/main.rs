@@ -18,6 +18,5 @@ fn main() {
         consume_uber(&config_kafka_cloned)
     });
 
-    listen_races(&configuration.kafka, &races)
-        .expect("TODO: panic message");
+    listen_races(&configuration.kafka, &races);
 }

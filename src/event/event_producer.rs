@@ -11,27 +11,35 @@ use crate::configuration::configuration::ConfigKafka;
 use crate::race::races::Races;
 use crate::race::uber::Uber;
 
-pub fn listen_races(kafka_config: &ConfigKafka, races: &Races) -> Result<()> {
+pub fn listen_races(kafka_config: &ConfigKafka, races: &Races) {
     let (tx, rx) = std::sync::mpsc::channel();
-    let mut watcher: INotifyWatcher = RecommendedWatcher::new(tx, Config::default())?;
+    let mut watcher: INotifyWatcher = RecommendedWatcher::new(tx, Config::default())
+        .expect("Cannot create watcher");
 
-    println!("Listening {}", races.ubers[0].input.path);
-    watcher.watch(races.ubers[0].input.path.as_ref(), RecursiveMode::Recursive)?;
-
-    for res in rx {
-        match res {
-            Ok(event) => {
-                if event.kind == EventKind::Access(Close(Write)) {
-                    produce_message(kafka_config, &races.ubers[0]).expect("TODO: panic message");
-                }
-            },
-            Err(error) => {
-                println!("watch error: {:?}", error);
-            }
-        }
+    for uber in &races.ubers {
+        watcher.watch(uber.input.path.as_ref(), RecursiveMode::Recursive).unwrap();
     }
 
-    Ok(())
+    loop {
+        match rx.recv() {
+            Ok(event_result) => {
+                if event_result.is_ok() {
+                    let event = event_result.unwrap();
+
+                    if event.kind == EventKind::Access(Close(Write)) {
+                        let path = event.paths[0].to_str();
+
+                        if let Some(uber) = races.has_uber_with_same_input_path(path.unwrap()) {
+                            produce_message(kafka_config, uber)
+                                .expect("TODO: panic message");
+                        }
+                    }
+                }
+            }
+
+            Err(e) => println!("Cannot get event: {:?}", e),
+        }
+    }
 }
 
 fn produce_message(kafka_config: &ConfigKafka, uber: &Uber) -> Result<()> {
