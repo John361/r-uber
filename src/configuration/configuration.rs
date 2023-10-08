@@ -24,11 +24,6 @@ pub struct UberOutput {
 
 impl Races {
 
-    pub fn to_string(&self) -> String {
-        serde_json_to_string(self)
-            .expect("Cannot serialize races")
-    }
-
     pub fn from_string(content: &str) -> Self {
         serde_json_from_str(content)
             .expect("Cannot deserialize races")
