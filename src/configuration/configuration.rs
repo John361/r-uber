@@ -16,12 +16,24 @@ pub struct ConfigKafka {
 
 impl Configuration {
 
-    pub fn from_settings(file_path: &str) -> Self {
+    pub fn from_file(config_path: &str) -> Self {
         Config::builder()
-            .add_source(config::File::with_name(file_path))
+            .add_source(config::File::with_name(config_path))
             .build()
             .expect("Cannot deserialize configuration")
             .try_deserialize()
             .expect("Cannot deserialize configuration")
+    }
+}
+
+#[cfg(test)]
+mod tests {
+
+    use super::*;
+
+    #[test]
+    fn config_loaded_and_parsed() {
+        let config_path: &str = "./tests/config.json";
+        let _config: Configuration = Configuration::from_file(config_path);
     }
 }
