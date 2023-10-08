@@ -7,10 +7,11 @@ use notify::{Config, EventKind, INotifyWatcher, RecommendedWatcher, RecursiveMod
 use notify::event::AccessKind::Close;
 use notify::event::AccessMode::Write;
 
+use crate::configuration::configuration::ConfigKafka;
 use crate::race::races::Races;
 use crate::race::uber::Uber;
 
-pub fn listen(races: &Races) -> Result<()> {
+pub fn listen_races(kafka_config: &ConfigKafka, races: &Races) -> Result<()> {
     let (tx, rx) = std::sync::mpsc::channel();
     let mut watcher: INotifyWatcher = RecommendedWatcher::new(tx, Config::default())?;
 
@@ -21,7 +22,7 @@ pub fn listen(races: &Races) -> Result<()> {
         match res {
             Ok(event) => {
                 if event.kind == EventKind::Access(Close(Write)) {
-                    produce_message(&races.ubers[0]).expect("TODO: panic message");
+                    produce_message(kafka_config, &races.ubers[0]).expect("TODO: panic message");
                 }
             },
             Err(error) => {
@@ -33,17 +34,20 @@ pub fn listen(races: &Races) -> Result<()> {
     Ok(())
 }
 
-fn produce_message(uber: &Uber) -> Result<()> {
+fn produce_message(kafka_config: &ConfigKafka, uber: &Uber) -> Result<()> {
     // https://github.com/kafka-rust/kafka-rust/issues/135#issuecomment-259823379
 
-    let mut client: KafkaClient = KafkaClient::new(vec!["localhost:9092".to_owned()]);
+    let mut client: KafkaClient = KafkaClient::new(kafka_config.hosts.to_owned());
     let mut attempt: u8 = 0;
 
     loop {
         attempt += 1;
-        let _ = client.load_metadata(&["uber-race"]).expect("Cannot load metadata");
+        let _ = client.load_metadata(&[kafka_config.topic.to_owned()])
+            .expect("Cannot load metadata");
 
-        if client.topics().partitions("uber-race").map(|p| p.len()).unwrap_or(0) > 0 { // <-- HERE
+        if client.topics().partitions(&kafka_config.topic)
+            .map(|p| p.len())
+            .unwrap_or(0) > 0 {
             break;
         } else if attempt > 2 { // try up to 3 times
             // return some error
@@ -54,12 +58,13 @@ fn produce_message(uber: &Uber) -> Result<()> {
     }
 
     let mut producer: Producer = Producer::from_client(client)
-            .with_ack_timeout(Duration::from_secs(1))
-            .with_required_acks(RequiredAcks::One)
-            .create().expect("Cannot create uber producer");
+        .with_ack_timeout(Duration::from_secs(1))
+        .with_required_acks(RequiredAcks::One)
+        .create()
+        .expect("Cannot create uber producer");
 
     producer.send(&Record {
-        topic: "uber-race",
+        topic: &kafka_config.topic,
         partition: -1,
         key: (),
         value: uber.to_string()
