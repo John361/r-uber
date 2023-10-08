@@ -1,20 +1,13 @@
 use serde::{Deserialize, Serialize};
 use serde_json::{from_str as serde_json_from_str, to_string as serde_json_to_string};
 
+use crate::race::uber_input::UberInput;
+use crate::race::uber_output::UberOutput;
+
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Uber {
     pub input: UberInput,
     pub outputs: Vec<UberOutput>
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-pub struct UberInput {
-    pub path: String
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-pub struct UberOutput {
-    pub path: String
 }
 
 impl Uber {
@@ -27,12 +20,5 @@ impl Uber {
     pub fn from_string(content: &str) -> Self {
         serde_json_from_str(content)
             .expect("Cannot deserialize uber")
-    }
-}
-
-impl UberInput {
-
-    pub fn is_same_path(&self, other_path: &str) -> bool {
-        other_path.contains(&self.path)
     }
 }
