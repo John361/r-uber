@@ -29,3 +29,11 @@ impl Uber {
             .expect("Cannot deserialize uber")
     }
 }
+
+impl UberInput {
+
+    pub fn is_same_path(&self, other_path: &str) -> bool {
+        println!("ici: {}", &self.path);
+        other_path.contains(&self.path)
+    }
+}
