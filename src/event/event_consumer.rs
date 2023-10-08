@@ -1,5 +1,7 @@
 use kafka::consumer::{Consumer, FetchOffset};
 
+use crate::configuration::configuration::Configuration;
+
 pub fn consume() {
     let hosts: Vec<String> = vec!["localhost:9092".to_owned()];
 
@@ -12,7 +14,9 @@ pub fn consume() {
     loop {
         for ms in consumer.poll().unwrap().iter() {
             for m in ms.messages() {
-                println!("{:?}", std::str::from_utf8(m.value).unwrap());
+                let content: &str = std::str::from_utf8(m.value).unwrap();
+                let configuration: Configuration = Configuration::from_string(content);
+                println!("{:?}", configuration);
             }
 
             consumer.consume_messageset(ms).unwrap();
