@@ -1,14 +1,14 @@
 use config::Config;
 use serde::Deserialize;
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct Configuration {
     pub races_path: String,
     pub kafka: ConfigKafka
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Clone, Debug)]
 pub struct ConfigKafka {
     pub hosts: Vec<String>,
     pub topic: String
