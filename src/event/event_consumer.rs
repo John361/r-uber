@@ -1,6 +1,6 @@
 use kafka::consumer::{Consumer, FetchOffset};
 
-use crate::configuration::configuration::ConfigKafka;
+use crate::configuration::ConfigKafka;
 use crate::race::uber::Uber;
 
 pub fn consume_uber(kafka_config: &ConfigKafka) {
@@ -14,7 +14,7 @@ pub fn consume_uber(kafka_config: &ConfigKafka) {
         for ms in consumer.poll().unwrap().iter() {
             for m in ms.messages() {
                 let content: &str = std::str::from_utf8(m.value).unwrap();
-                let uber: Uber = Uber::from_string(content);
+                let uber: Uber = Uber::from_json_string(content);
 
                 for uber_output in &uber.outputs {
                     uber_output.take_passenger_and_drive_to(&uber.input.path)

@@ -5,17 +5,16 @@ use serde::Deserialize;
 #[serde(rename_all = "camelCase")]
 pub struct Configuration {
     pub races_path: String,
-    pub kafka: ConfigKafka
+    pub kafka: ConfigKafka,
 }
 
 #[derive(Deserialize, Clone, Debug)]
 pub struct ConfigKafka {
     pub hosts: Vec<String>,
-    pub topic: String
+    pub topic: String,
 }
 
 impl Configuration {
-
     pub fn from_file(file_path: &str) -> Self {
         Config::builder()
             .add_source(config::File::with_name(file_path))
