@@ -33,6 +33,8 @@ pub fn listen(configuration: &Configuration) -> Result<()> {
 }
 
 fn produce_message(configuration: &Configuration) -> Result<()> {
+    // https://github.com/kafka-rust/kafka-rust/issues/135#issuecomment-259823379
+
     let mut client: KafkaClient = KafkaClient::new(vec!["localhost:9092".to_owned()]);
     let mut attempt: u8 = 0;
 
