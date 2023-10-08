@@ -6,7 +6,6 @@ use kafka::producer::{Producer, Record};
 use notify::{Config, EventKind, INotifyWatcher, RecommendedWatcher, RecursiveMode, Result, Watcher};
 use notify::event::AccessKind::Close;
 use notify::event::AccessMode::Write;
-use serde_json::to_string as serde_json_to_string;
 
 use crate::configuration::configuration::Configuration;
 
@@ -61,7 +60,7 @@ fn produce_message(configuration: &Configuration) -> Result<()> {
         topic: "topic-name",
         partition: -1,
         key: (),
-        value: serde_json_to_string(configuration).expect("Cannot convert configuration to string")
+        value: configuration.to_string()
     }).expect("Cannot send record");
 
     Ok(())

@@ -1,5 +1,5 @@
 use std::fs;
-use serde_json::{from_str as serde_json_from_str};
+
 use crate::configuration::configuration::Configuration;
 
 pub fn read(configuration_file_path: &str) -> Configuration {
@@ -9,8 +9,7 @@ pub fn read(configuration_file_path: &str) -> Configuration {
     let content: String = fs::read_to_string(configuration_file_path)
         .expect(&error_message);
 
-    serde_json_from_str(&content)
-        .expect(&error_message)
+    Configuration::from_string(&content)
 }
 
 #[cfg(test)]
