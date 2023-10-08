@@ -24,21 +24,17 @@ mod tests {
 
     #[test]
     fn should_same_path_true() {
-        let content = UberInput {
-            path: "some/relative/path".to_string()
-        };
-
+        let content: UberInput = simple_instance();
         let result: bool = content.is_same_path("add/absolute/path/to/some/relative/path");
+
         assert_eq!(result, true);
     }
 
     #[test]
     fn should_same_path_false() {
-        let content = UberInput {
-            path: "some/relative/path".to_string()
-        };
-
+        let content: UberInput = simple_instance();
         let result: bool = content.is_same_path("add/absolute/path/to/relative/path");
+
         assert_eq!(result, false);
     }
 }
