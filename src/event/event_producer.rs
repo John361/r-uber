@@ -7,19 +7,21 @@ use notify::{Config, EventKind, INotifyWatcher, RecommendedWatcher, RecursiveMod
 use notify::event::AccessKind::Close;
 use notify::event::AccessMode::Write;
 
-use crate::configuration::configuration::Configuration;
+use crate::race::races::Races;
+use crate::race::uber::Uber;
 
-pub fn listen(configuration: &Configuration) -> Result<()> {
+pub fn listen(races: &Races) -> Result<()> {
     let (tx, rx) = std::sync::mpsc::channel();
     let mut watcher: INotifyWatcher = RecommendedWatcher::new(tx, Config::default())?;
 
-    watcher.watch(configuration.input.path.as_ref(), RecursiveMode::Recursive)?;
+    println!("Listening {}", races.ubers[0].input.path);
+    watcher.watch(races.ubers[0].input.path.as_ref(), RecursiveMode::Recursive)?;
 
     for res in rx {
         match res {
             Ok(event) => {
                 if event.kind == EventKind::Access(Close(Write)) {
-                    produce_message(configuration).expect("TODO: panic message");
+                    produce_message(&races.ubers[0]).expect("TODO: panic message");
                 }
             },
             Err(error) => {
@@ -31,7 +33,7 @@ pub fn listen(configuration: &Configuration) -> Result<()> {
     Ok(())
 }
 
-fn produce_message(configuration: &Configuration) -> Result<()> {
+fn produce_message(uber: &Uber) -> Result<()> {
     // https://github.com/kafka-rust/kafka-rust/issues/135#issuecomment-259823379
 
     let mut client: KafkaClient = KafkaClient::new(vec!["localhost:9092".to_owned()]);
@@ -39,9 +41,9 @@ fn produce_message(configuration: &Configuration) -> Result<()> {
 
     loop {
         attempt += 1;
-        let _ = client.load_metadata(&["topic-name"]).expect("Cannot load metadata");
+        let _ = client.load_metadata(&["uber-race"]).expect("Cannot load metadata");
 
-        if client.topics().partitions("topic-name").map(|p| p.len()).unwrap_or(0) > 0 { // <-- HERE
+        if client.topics().partitions("uber-race").map(|p| p.len()).unwrap_or(0) > 0 { // <-- HERE
             break;
         } else if attempt > 2 { // try up to 3 times
             // return some error
@@ -54,13 +56,13 @@ fn produce_message(configuration: &Configuration) -> Result<()> {
     let mut producer: Producer = Producer::from_client(client)
             .with_ack_timeout(Duration::from_secs(1))
             .with_required_acks(RequiredAcks::One)
-            .create().expect("Cannot create producer");
+            .create().expect("Cannot create uber producer");
 
     producer.send(&Record {
-        topic: "topic-name",
+        topic: "uber-race",
         partition: -1,
         key: (),
-        value: configuration.to_string()
+        value: uber.to_string()
     }).expect("Cannot send record");
 
     Ok(())

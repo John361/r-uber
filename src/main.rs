@@ -1,19 +1,19 @@
 use std::thread;
 
-use crate::configuration::configuration::Configuration;
-use crate::configuration::reader::read;
-use crate::event::event_consumer::consume;
+use crate::race::races::Races;
+use crate::race::reader::read;
+use crate::event::event_consumer::consume_uber;
 use crate::event::event_producer::listen;
 
-mod configuration;
+mod race;
 mod event;
 
 fn main() {
-    let configuration_path: &str = "./tests/configurations.json";
-    let configuration: Configuration = read(configuration_path);
+    let configuration_path: &str = "./tests/races.json";
+    let configuration: Races = read(configuration_path);
 
     thread::spawn(|| {
-        consume()
+        consume_uber()
     });
 
     listen(&configuration)
