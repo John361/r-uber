@@ -1,6 +1,6 @@
 use kafka::consumer::{Consumer, FetchOffset};
 
-use crate::configuration::configuration::ConfigKafka;
+use crate::configuration::ConfigKafka;
 use crate::race::uber::Uber;
 
 pub fn consume_uber(kafka_config: &ConfigKafka) {

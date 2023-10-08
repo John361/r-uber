@@ -7,7 +7,7 @@ use notify::{Config, EventKind, INotifyWatcher, RecommendedWatcher, RecursiveMod
 use notify::event::AccessKind::Close;
 use notify::event::AccessMode::Write;
 
-use crate::configuration::configuration::ConfigKafka;
+use crate::configuration::ConfigKafka;
 use crate::race::races::Races;
 use crate::race::uber::Uber;
 

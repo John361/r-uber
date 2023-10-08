@@ -1,6 +1,6 @@
 use std::thread;
 
-use crate::configuration::configuration::{ConfigKafka, Configuration};
+use crate::configuration::{ConfigKafka, Configuration};
 use crate::event::event_consumer::consume_uber;
 use crate::event::event_producer::listen_races;
 use crate::race::races::Races;
