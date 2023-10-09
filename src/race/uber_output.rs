@@ -10,6 +10,8 @@ pub enum UberOutput {
         path: String,
     },
     Sftp {
+        host: String,
+        port: String,
         login: String,
         #[serde(rename = "authenticationMethod")]
         authentication_method: UberOutputSftpAuthenticationMethod,
@@ -45,6 +47,8 @@ impl UberOutput {
             }
 
             UberOutput::Sftp {
+                host,
+                port,
                 login,
                 authentication_method,
                 remote_path,
