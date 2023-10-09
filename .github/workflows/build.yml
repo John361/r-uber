@@ -18,9 +18,9 @@ jobs:
     build:
         runs-on: ubuntu-latest
         permissions:
-            contents: read
-            id-token: read
-            actions: read
+            contents: write
+            id-token: write
+            actions: write
         steps:
             # Checkout
             - name: Checkout
