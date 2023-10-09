@@ -7,10 +7,13 @@ use crate::race::races::Races;
 
 mod configuration;
 mod event;
+mod logger;
 mod race;
 mod race_action;
 
 fn main() {
+    logger::initialize();
+
     let configuration: Configuration = Configuration::from_file("./tests/config");
     let config_kafka_cloned: ConfigKafka = configuration.kafka.clone();
     let races: Races = Races::from_file(&configuration.races_path);
