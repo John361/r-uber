@@ -1,0 +1,35 @@
+name: R-uber release
+
+on:
+    push:
+        tags:
+            - v[0-9]+.*
+    workflow_dispatch:
+
+permissions:
+    contents: write
+    id-token: write
+
+jobs:
+    release:
+        runs-on: ubuntu-latest
+        permissions:
+            contents: write
+        steps:
+            # Checkout
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            # Release
+            - name: Release
+              uses: taiki-e/create-gh-release-action@v1
+              with:
+                  token: ${{ secrets.GITHUB_TOKEN }}
+
+            # Upload assets
+            - name: Upload assets
+              uses: taiki-e/upload-rust-binary-action@v1
+              with:
+                  bin: r-uber
+                  token: ${{ secrets.GITHUB_TOKEN }}
+                  asset: README.md

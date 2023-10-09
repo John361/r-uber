@@ -1,4 +1,4 @@
-name: R-uber tests
+name: R-uber build
 
 on:
     push:
