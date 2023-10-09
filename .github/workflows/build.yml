@@ -44,13 +44,14 @@ jobs:
 
             # Clippy
             - name: Add Clippy
-              run: rustup component add clippy
+              uses: dtolnay/rust-toolchain@stable
+              with:
+                  components: clippy
 
             - name: Run Clippy
-              uses: actions-rs/clippy-check@v1
+              uses: giraffate/clippy-action@v1
               with:
-                  token: ${{ secrets.GITHUB_TOKEN }}
-                  args: --all-features
+                  github_token: ${{ secrets.GITHUB_TOKEN }}
 
             # Audit
             - name: Audit checkout
