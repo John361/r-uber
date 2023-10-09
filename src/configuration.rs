@@ -4,10 +4,11 @@ use serde::Deserialize;
 #[derive(Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct Configuration {
+    pub app_name: String,
     pub races_path: String,
     pub kafka: ConfigKafka,
 }
-
+c
 #[derive(Deserialize, Clone, Debug)]
 pub struct ConfigKafka {
     pub hosts: Vec<String>,
