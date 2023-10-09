@@ -49,8 +49,8 @@ impl UberOutput {
             UberOutput::Sftp { .. } => {
                 if let Err(error) = sftp::copy(passenger.as_ref(), self) {
                     println!(
-                        "Error occured when remotely copy {}: {}",
-                        passenger, error.to_string()
+                        "Error occured when remotely copy {}: {:?}",
+                        passenger, error
                     );
                 } else {
                     println!("Successfully remotely copy {}", passenger);
