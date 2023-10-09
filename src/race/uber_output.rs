@@ -1,3 +1,4 @@
+use crate::logger;
 use serde::{Deserialize, Serialize};
 
 use crate::race::uber::Uber;
@@ -35,25 +36,29 @@ pub enum UberOutputSftpAuthenticationMethod {
 impl UberOutput {
     pub fn take_passenger_and_drive_to(&self, _: &Uber, passenger: &str) {
         match &self {
-            UberOutput::Local { path } => {
+            UberOutput::Local { .. } => {
                 if let Err(error) = local::copy(passenger.as_ref(), self) {
-                    println!(
-                        "Error occured when copy from {} to {}: {:?}",
-                        passenger, path, error
-                    );
+                    let error_message = format!("Error occurred with passenger: {}", error);
+                    logger::warn("uber_output", "take_passenger_and_drive_to", &error_message);
                 } else {
-                    println!("Successfully copy from {} to {}", passenger, path);
+                    logger::info(
+                        "uber_output",
+                        "take_passenger_and_drive_to",
+                        "Successfully drive passenger to destination",
+                    );
                 }
             }
 
             UberOutput::Sftp { .. } => {
                 if let Err(error) = sftp::copy(passenger.as_ref(), self) {
-                    println!(
-                        "Error occured when remotely copy {}: {:?}",
-                        passenger, error
-                    );
+                    let error_message = format!("Error occurred with passenger: {}", error);
+                    logger::warn("uber_output", "take_passenger_and_drive_to", &error_message);
                 } else {
-                    println!("Successfully remotely copy {}", passenger);
+                    logger::info(
+                        "uber_output",
+                        "take_passenger_and_drive_to",
+                        "Successfully drive passenger to destination",
+                    );
                 }
             }
         }
