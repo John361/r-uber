@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 use crate::race::uber::Uber;
-use crate::race_action::local;
+use crate::race_action::{local, sftp};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
@@ -10,6 +10,8 @@ pub enum UberOutput {
         path: String,
     },
     Sftp {
+        host: String,
+        port: String,
         login: String,
         #[serde(rename = "authenticationMethod")]
         authentication_method: UberOutputSftpAuthenticationMethod,
@@ -31,7 +33,7 @@ pub enum UberOutputSftpAuthenticationMethod {
 }
 
 impl UberOutput {
-    pub fn take_passenger_and_drive_to(&self, uber: &Uber, passenger: &str) {
+    pub fn take_passenger_and_drive_to(&self, _: &Uber, passenger: &str) {
         match &self {
             UberOutput::Local { path } => {
                 if let Err(error) = local::copy(passenger.as_ref(), self) {
@@ -44,15 +46,15 @@ impl UberOutput {
                 }
             }
 
-            UberOutput::Sftp {
-                login,
-                authentication_method,
-                remote_path,
-            } => {
-                println!(
-                    "Should copy file remotely from {} to {} using login {} with auth method {:?}",
-                    uber.input.path, remote_path, login, authentication_method
-                );
+            UberOutput::Sftp { .. } => {
+                if let Err(error) = sftp::copy(passenger.as_ref(), self) {
+                    println!(
+                        "Error occured when remotely copy {}: {:?}",
+                        passenger, error
+                    );
+                } else {
+                    println!("Successfully remotely copy {}", passenger);
+                }
             }
         }
     }
