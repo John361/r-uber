@@ -8,7 +8,7 @@ pub struct Configuration {
     pub races_path: String,
     pub kafka: ConfigKafka,
 }
-c
+
 #[derive(Deserialize, Clone, Debug)]
 pub struct ConfigKafka {
     pub hosts: Vec<String>,
