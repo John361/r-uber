@@ -8,6 +8,7 @@ use crate::race::races::Races;
 mod configuration;
 mod event;
 mod race;
+mod race_action;
 
 fn main() {
     let configuration: Configuration = Configuration::from_file("./tests/config");
