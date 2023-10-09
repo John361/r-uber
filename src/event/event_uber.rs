@@ -4,7 +4,7 @@ use serde_json::{from_str as serde_json_from_str, to_string as serde_json_to_str
 use crate::logger;
 use crate::race::uber::Uber;
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct EventUber {
     pub uber: Uber,
     pub passenger: String,
