@@ -30,7 +30,7 @@ pub fn copy(input: &Path, output: &UberOutput) -> Result<bool, String> {
 
                         _ => {
                             let error_message: String = format!("Wrong output used with the method: {:?}", output);
-                            logger::warn("sftp", "create_ssh_session", &error_message);
+                            logger::warn("sftp", "copy", &error_message);
                             Err(error_message)
                         }
                     }
