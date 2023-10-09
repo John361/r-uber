@@ -13,7 +13,7 @@ pub struct EventUber {
 impl EventUber {
     pub fn to_json_string(&self) -> Result<String, String> {
         match serde_json_to_string(self) {
-            Ok(content) => { Ok(content) }
+            Ok(content) => Ok(content),
 
             Err(error) => {
                 let error_message = format!("Cannot convert EventUber to String: {}", error);
@@ -25,7 +25,7 @@ impl EventUber {
 
     pub fn from_json_string(content: &str) -> Result<Self, String> {
         match serde_json_from_str::<EventUber>(content) {
-            Ok(event_uber) => { Ok(event_uber) }
+            Ok(event_uber) => Ok(event_uber),
 
             Err(error) => {
                 let error_message = format!("Cannot convert from string to EventUber: {}", error);

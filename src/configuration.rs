@@ -24,18 +24,24 @@ impl Configuration {
             .build();
 
         match config {
-            Ok(config) => {
-                match config.try_deserialize::<Configuration>() {
-                    Ok(configuration) => {
-                        logger::info("configuration", "from_file", "Successfully parsed configuration file");
-                        Ok(configuration)
-                    }
-                    Err(_) => {
-                        logger::error("configuration", "from_file", "Cannot deserialize configuration file");
-                        Err("Cannot deserialize configuration file".to_string())
-                    }
+            Ok(config) => match config.try_deserialize::<Configuration>() {
+                Ok(configuration) => {
+                    logger::info(
+                        "configuration",
+                        "from_file",
+                        "Successfully parsed configuration file",
+                    );
+                    Ok(configuration)
                 }
-            }
+                Err(_) => {
+                    logger::error(
+                        "configuration",
+                        "from_file",
+                        "Cannot deserialize configuration file",
+                    );
+                    Err("Cannot deserialize configuration file".to_string())
+                }
+            },
 
             Err(error) => {
                 let error_message: String = format!("Cannot build configuration file: {}", error);

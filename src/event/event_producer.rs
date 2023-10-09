@@ -3,11 +3,9 @@ use std::time::Duration;
 
 use kafka::client::{KafkaClient, RequiredAcks};
 use kafka::producer::{Producer, Record};
-use notify::{
-    Config, EventKind, RecommendedWatcher, RecursiveMode, Watcher,
-};
 use notify::event::AccessKind::Close;
 use notify::event::AccessMode::Write;
+use notify::{Config, EventKind, RecommendedWatcher, RecursiveMode, Watcher};
 
 use crate::configuration::ConfigKafka;
 use crate::event::event_uber::EventUber;
@@ -21,7 +19,9 @@ pub fn listen_races(kafka_config: &ConfigKafka, races: &Races) {
     match recommended_watcher {
         Ok(mut watcher) => {
             for uber in &races.ubers {
-                if let Err(error) = watcher.watch(uber.input.path.as_ref(), RecursiveMode::Recursive) {
+                if let Err(error) =
+                    watcher.watch(uber.input.path.as_ref(), RecursiveMode::Recursive)
+                {
                     let error_message: String = format!("Cannot watch: {}", error);
                     logger::error("event_producer", "listen_races", &error_message);
                 }
@@ -41,13 +41,25 @@ pub fn listen_races(kafka_config: &ConfigKafka, races: &Races) {
 
                                         match produce_message(kafka_config, event_message.clone()) {
                                             Ok(_) => {
-                                                let success_message: String = format!("Successfully produce event for passenger {}", &event_message.passenger);
-                                                logger::info("event_producer", "listen_races", &success_message);
+                                                let success_message: String = format!(
+                                                    "Successfully produce event for passenger {}",
+                                                    &event_message.passenger
+                                                );
+                                                logger::info(
+                                                    "event_producer",
+                                                    "listen_races",
+                                                    &success_message,
+                                                );
                                             }
 
                                             Err(error) => {
-                                                let error_message: String = format!("Cannot produce event: {}", error);
-                                                logger::error("event_producer", "listen_races", &error_message);
+                                                let error_message: String =
+                                                    format!("Cannot produce event: {}", error);
+                                                logger::error(
+                                                    "event_producer",
+                                                    "listen_races",
+                                                    &error_message,
+                                                );
                                             }
                                         }
                                     }
@@ -59,7 +71,7 @@ pub fn listen_races(kafka_config: &ConfigKafka, races: &Races) {
                     Err(error) => {
                         let error_message: String = format!("Cannot get event: {}", error);
                         logger::error("event_producer", "listen_races", &error_message);
-                    },
+                    }
                 }
             }
         }
@@ -69,8 +81,6 @@ pub fn listen_races(kafka_config: &ConfigKafka, races: &Races) {
             logger::error("event_producer", "listen_races", &error_message);
         }
     }
-
-
 }
 
 fn produce_message(kafka_config: &ConfigKafka, event: EventUber) -> Result<bool, String> {
@@ -96,8 +106,13 @@ fn produce_message(kafka_config: &ConfigKafka, event: EventUber) -> Result<bool,
             > 0
         {
             break;
-        } else if attempt > 2 { // try up to 3 times
-            logger::warn("event_producer", "produce_message", "Kafka error with client");
+        } else if attempt > 2 {
+            // try up to 3 times
+            logger::warn(
+                "event_producer",
+                "produce_message",
+                "Kafka error with client",
+            );
             return Err("Kafka error with client".to_string());
         }
 
@@ -110,38 +125,37 @@ fn produce_message(kafka_config: &ConfigKafka, event: EventUber) -> Result<bool,
         .create();
 
     match client_producer {
-        Ok(mut producer) => {
-            match event.to_json_string() {
-                Ok(content) => {
-                    let result = producer.send(&Record {
-                        topic: &kafka_config.topic,
-                        partition: -1,
-                        key: (),
-                        value: content,
-                    });
+        Ok(mut producer) => match event.to_json_string() {
+            Ok(content) => {
+                let result = producer.send(&Record {
+                    topic: &kafka_config.topic,
+                    partition: -1,
+                    key: (),
+                    value: content,
+                });
 
-                    match result {
-                        Ok(_) => {
-                            let success_message: String = format!("Successfully sent event for passenger {}", &event.passenger);
-                            logger::info("event_producer", "produce_message", &success_message);
-                            Ok(true)
-                        }
+                match result {
+                    Ok(_) => {
+                        let success_message: String =
+                            format!("Successfully sent event for passenger {}", &event.passenger);
+                        logger::info("event_producer", "produce_message", &success_message);
+                        Ok(true)
+                    }
 
-                        Err(error) => {
-                            let error_message: String = format!("Cannot send event: {}", error);
-                            logger::error("event_producer", "produce_message", &error_message);
-                            Err(error_message)
-                        }
+                    Err(error) => {
+                        let error_message: String = format!("Cannot send event: {}", error);
+                        logger::error("event_producer", "produce_message", &error_message);
+                        Err(error_message)
                     }
                 }
-
-                Err(error) => {
-                    let error_message: String = format!("Error occurred with event: {}", error);
-                    logger::error("event_producer", "produce_message", &error_message);
-                    Err(error_message)
-                }
             }
-        }
+
+            Err(error) => {
+                let error_message: String = format!("Error occurred with event: {}", error);
+                logger::error("event_producer", "produce_message", &error_message);
+                Err(error_message)
+            }
+        },
 
         Err(error) => {
             let error_message: String = format!("Cannot create event producer: {}", error);

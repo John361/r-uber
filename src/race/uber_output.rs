@@ -1,5 +1,5 @@
-use serde::{Deserialize, Serialize};
 use crate::logger;
+use serde::{Deserialize, Serialize};
 
 use crate::race::uber::Uber;
 use crate::race_action::{local, sftp};
@@ -41,7 +41,11 @@ impl UberOutput {
                     let error_message = format!("Error occurred with passenger: {}", error);
                     logger::warn("uber_output", "take_passenger_and_drive_to", &error_message);
                 } else {
-                    logger::info("uber_output", "take_passenger_and_drive_to", "Successfully drive passenger to destination");
+                    logger::info(
+                        "uber_output",
+                        "take_passenger_and_drive_to",
+                        "Successfully drive passenger to destination",
+                    );
                 }
             }
 
@@ -50,7 +54,11 @@ impl UberOutput {
                     let error_message = format!("Error occurred with passenger: {}", error);
                     logger::warn("uber_output", "take_passenger_and_drive_to", &error_message);
                 } else {
-                    logger::info("uber_output", "take_passenger_and_drive_to", "Successfully drive passenger to destination");
+                    logger::info(
+                        "uber_output",
+                        "take_passenger_and_drive_to",
+                        "Successfully drive passenger to destination",
+                    );
                 }
             }
         }

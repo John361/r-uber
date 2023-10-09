@@ -15,12 +15,17 @@ impl Races {
     pub fn from_string(content: &str) -> Result<Self, String> {
         match serde_json_from_str::<Races>(content) {
             Ok(result) => {
-                logger::info("races", "from_string", "Successfully convert races string to Races");
+                logger::info(
+                    "races",
+                    "from_string",
+                    "Successfully convert races string to Races",
+                );
                 Ok(result)
             }
 
             Err(error) => {
-                let error_message: String = format!("Cannot convert from string to Races: {}", error);
+                let error_message: String =
+                    format!("Cannot convert from string to Races: {}", error);
                 logger::error("races", "from_string", &error_message);
                 Err(error_message)
             }
@@ -29,19 +34,17 @@ impl Races {
 
     pub fn from_file(file_path: &str) -> Result<Self, String> {
         match fs::read_to_string(file_path) {
-            Ok(content) => {
-                match Races::from_string(&content) {
-                    Ok(races) => {
-                        logger::info("races", "from_file", "Successfully load races from file");
-                        Ok(races)
-                    }
-
-                    Err(error) => {
-                        logger::error("races", "from_file", &error);
-                        Err(error)
-                    }
+            Ok(content) => match Races::from_string(&content) {
+                Ok(races) => {
+                    logger::info("races", "from_file", "Successfully load races from file");
+                    Ok(races)
                 }
-            }
+
+                Err(error) => {
+                    logger::error("races", "from_file", &error);
+                    Err(error)
+                }
+            },
 
             Err(error) => {
                 let error_message: String = format!("Cannot read file to string: {}", error);
