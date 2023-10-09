@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+
 use crate::race::uber::Uber;
 use crate::race_action::local;
 
@@ -33,11 +34,11 @@ impl UberOutput {
     pub fn take_passenger_and_drive_to(&self, uber: &Uber, passenger: &str) {
         match &self {
             UberOutput::Local { path } => {
-                // if let Err(error) = local::copy(&passenger, self) {
-                //    println!("Error occured when copy from {} to {}: {:?}", passenger, path, error);
-                // } else {
-                //     println!("Successfully copy from {} to {}", passenger, path);
-                // }
+                if let Err(error) = local::copy(&passenger.as_ref(), self) {
+                   println!("Error occured when copy from {} to {}: {:?}", passenger, path, error);
+                } else {
+                    println!("Successfully copy from {} to {}", passenger, path);
+                }
             }
 
             UberOutput::Sftp {
@@ -45,10 +46,10 @@ impl UberOutput {
                 authentication_method,
                 remote_path,
             } => {
-                // println!(
-                //     "Should copy file remotely from {} to {} using login {} with auth method {:?}",
-                //     uber.input.path, remote_path, login, authentication_method
-                // );
+                println!(
+                    "Should copy file remotely from {} to {} using login {} with auth method {:?}",
+                    uber.input.path, remote_path, login, authentication_method
+                );
             }
         }
     }

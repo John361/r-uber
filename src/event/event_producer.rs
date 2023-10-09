@@ -12,7 +12,6 @@ use notify::event::AccessMode::Write;
 use crate::configuration::ConfigKafka;
 use crate::event::event_uber::EventUber;
 use crate::race::races::Races;
-use crate::race::uber::Uber;
 
 pub fn listen_races(kafka_config: &ConfigKafka, races: &Races) {
     let (tx, rx) = std::sync::mpsc::channel();
@@ -33,7 +32,12 @@ pub fn listen_races(kafka_config: &ConfigKafka, races: &Races) {
                         let path = event.paths[0].to_str();
 
                         if let Some(uber) = races.has_uber_with_same_input_path(path.unwrap()) {
-                            produce_message(kafka_config, uber, path.unwrap()).expect("TODO: panic message");
+                            let event_message: EventUber = EventUber {
+                                uber: uber.clone(),
+                                passenger: path.unwrap().to_string()
+                            };
+
+                            produce_message(kafka_config, event_message).expect("TODO: panic message");
                         }
                     }
                 }
@@ -44,7 +48,7 @@ pub fn listen_races(kafka_config: &ConfigKafka, races: &Races) {
     }
 }
 
-fn produce_message(kafka_config: &ConfigKafka, uber: &Uber, passenger: &str) -> Result<()> {
+fn produce_message(kafka_config: &ConfigKafka, event: EventUber) -> Result<()> {
     // https://github.com/kafka-rust/kafka-rust/issues/135#issuecomment-259823379
 
     let mut client: KafkaClient = KafkaClient::new(kafka_config.hosts.to_owned());
@@ -81,17 +85,12 @@ fn produce_message(kafka_config: &ConfigKafka, uber: &Uber, passenger: &str) -> 
         .create()
         .expect("Cannot create uber producer");
 
-    let event_message: EventUber = EventUber {
-        uber: uber.clone(),
-        passenger: passenger.to_string()
-    };
-
     producer
         .send(&Record {
             topic: &kafka_config.topic,
             partition: -1,
             key: (),
-            value: event_message.to_json_string(),
+            value: event.to_json_string(),
         })
         .expect("Cannot send record");
 
