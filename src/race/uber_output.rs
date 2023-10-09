@@ -35,7 +35,10 @@ impl UberOutput {
         match &self {
             UberOutput::Local { path } => {
                 if let Err(error) = local::copy(passenger.as_ref(), self) {
-                   println!("Error occured when copy from {} to {}: {:?}", passenger, path, error);
+                    println!(
+                        "Error occured when copy from {} to {}: {:?}",
+                        passenger, path, error
+                    );
                 } else {
                     println!("Successfully copy from {} to {}", passenger, path);
                 }

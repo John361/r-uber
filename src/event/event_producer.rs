@@ -3,11 +3,11 @@ use std::time::Duration;
 
 use kafka::client::{KafkaClient, RequiredAcks};
 use kafka::producer::{Producer, Record};
+use notify::event::AccessKind::Close;
+use notify::event::AccessMode::Write;
 use notify::{
     Config, EventKind, INotifyWatcher, RecommendedWatcher, RecursiveMode, Result, Watcher,
 };
-use notify::event::AccessKind::Close;
-use notify::event::AccessMode::Write;
 
 use crate::configuration::ConfigKafka;
 use crate::event::event_uber::EventUber;
@@ -34,10 +34,11 @@ pub fn listen_races(kafka_config: &ConfigKafka, races: &Races) {
                         if let Some(uber) = races.has_uber_with_same_input_path(path.unwrap()) {
                             let event_message: EventUber = EventUber {
                                 uber: uber.clone(),
-                                passenger: path.unwrap().to_string()
+                                passenger: path.unwrap().to_string(),
                             };
 
-                            produce_message(kafka_config, event_message).expect("TODO: panic message");
+                            produce_message(kafka_config, event_message)
+                                .expect("TODO: panic message");
                         }
                     }
                 }
