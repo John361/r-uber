@@ -17,6 +17,8 @@ pub fn copy(input: &Path, output: &UberOutput) -> Result<bool, String> {
                         logger::warn("sftp", "copy", &error_message);
                         Err(error_message)
                     } else {
+                        let success_message: String = format!("Successfully remotely copy file from {:?} to {}", input, "./"); // TODO: fix path
+                        logger::info("local", "copy", &success_message);
                         Ok(true)
                     }
                 }
