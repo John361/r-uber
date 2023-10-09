@@ -14,10 +14,28 @@ mod race_action;
 fn main() {
     logger::initialize();
 
-    let configuration: Configuration = Configuration::from_file("./tests/config").expect(""); // TODO: handle?
-    let config_kafka_cloned: ConfigKafka = configuration.kafka.clone();
-    let races: Races = Races::from_file(&configuration.races_path).expect(""); // TODO: handle?
+    match Configuration::from_file("./tests/config") {
+        Ok(configuration) => {
+            let config_kafka_cloned: ConfigKafka = configuration.kafka.clone();
 
-    thread::spawn(move || consume_uber(&config_kafka_cloned));
-    listen_races(&configuration.kafka, &races);
+            match Races::from_file(&configuration.races_path) {
+                Ok(races) => {
+                    thread::spawn(move || consume_uber(&config_kafka_cloned));
+                    listen_races(&configuration.kafka, &races);
+                }
+
+                Err(error) => {
+                    let error_message: String = format!("Cannot read races file: {}", error);
+                    logger::error("main", "main", &error_message);
+                    panic!("{}", error_message)
+                }
+            }
+        }
+
+        Err(error) => {
+            let error_message: String = format!("Cannot read configuration file: {}", error);
+            logger::error("main", "main", &error_message);
+            panic!("{}", error_message)
+        }
+    }
 }
