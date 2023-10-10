@@ -4,9 +4,26 @@
 
 Tool written in Rust that can listening in multiple folders recursively for files and move them in other folders
 
-
-# Start app
+# Development
+## Docker
 ```shell
 bash tools/init.sh
 docker-compose -f tools/docker/docker-compose.yml up --build
+```
+
+## Config file
+```json
+{
+    "appName": "R-uber",
+    "racesPath": "full/path/to/races.json",
+    "kafka": {
+        "hosts": ["localhost:9094"],
+        "topic": "uber-race"
+    }
+}
+```
+
+## Rust
+```
+RUST_LOG=Info cargo run --package r-uber --bin r-uber start -c full/path/to/r-uber/config.json
 ```
