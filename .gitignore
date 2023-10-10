@@ -2,5 +2,7 @@
 .vscode/
 
 target/
+
 tests/**/*.txt
 tests/config.json
+tests/races.json

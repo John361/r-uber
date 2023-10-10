@@ -23,6 +23,9 @@ docker-compose -f tools/docker/docker-compose.yml up --build
 }
 ```
 
+## Races file
+See schema in tools/schemas/races-schema.json
+
 ## Rust
 ```
 RUST_LOG=Info cargo run --package r-uber --bin r-uber start -c full/path/to/r-uber/config.json
