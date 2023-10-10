@@ -1,10 +1,9 @@
 #[derive(Debug)]
 pub struct Argument {
-    pub config_path: String
+    pub config_path: String,
 }
 
 impl Argument {
-
     pub fn build() -> Result<Self, String> {
         let cmd = clap::Command::new("r-uber")
             .bin_name("r-uber")
@@ -23,16 +22,11 @@ impl Argument {
         };
 
         match matches.get_one::<std::path::PathBuf>("config") {
-            Some(config_path) => {
-                Ok(Argument {
-                    config_path: config_path.as_path().display().to_string()
-                })
-            }
+            Some(config_path) => Ok(Argument {
+                config_path: config_path.as_path().display().to_string(),
+            }),
 
-            None => {
-                Err("Missing config argument value".to_string())
-            }
+            None => Err("Missing config argument value".to_string()),
         }
-
     }
 }
