@@ -9,40 +9,37 @@ use crate::race::uber_output::{UberOutput, UberOutputSftpAuthenticationMethod};
 
 pub fn copy(input: &Path, output: &UberOutput) -> Result<bool, String> {
     match create_ssh_session(output) {
-        Ok(session) => {
-            match session.run_local().open_scp() {
-                Ok(scp) => {
-                    match output {
-                        UberOutput::Sftp { remote_path, .. } => {
-                            if let Err(error) = scp.upload(input, remote_path.as_ref()) {
-                                let error_message = format!("Cannot open scp: {}", error);
-                                logger::warn("sftp", "copy", &error_message);
-                                Err(error_message)
-                            } else {
-                                let success_message: String = format!(
-                                    "Successfully remotely copy file from {:?} to {}",
-                                    input, &remote_path
-                                );
-                                logger::info("local", "copy", &success_message);
-                                Ok(true)
-                            }
-                        }
-
-                        _ => {
-                            let error_message: String = format!("Wrong output used with the method: {:?}", output);
-                            logger::warn("sftp", "copy", &error_message);
-                            Err(error_message)
-                        }
+        Ok(session) => match session.run_local().open_scp() {
+            Ok(scp) => match output {
+                UberOutput::Sftp { remote_path, .. } => {
+                    if let Err(error) = scp.upload(input, remote_path.as_ref()) {
+                        let error_message = format!("Cannot open scp: {}", error);
+                        logger::warn("sftp", "copy", &error_message);
+                        Err(error_message)
+                    } else {
+                        let success_message: String = format!(
+                            "Successfully remotely copy file from {:?} to {}",
+                            input, &remote_path
+                        );
+                        logger::info("local", "copy", &success_message);
+                        Ok(true)
                     }
                 }
 
-                Err(error) => {
-                    let error_message = format!("Cannot open scp: {}", error);
+                _ => {
+                    let error_message: String =
+                        format!("Wrong output used with the method: {:?}", output);
                     logger::warn("sftp", "copy", &error_message);
                     Err(error_message)
                 }
+            },
+
+            Err(error) => {
+                let error_message = format!("Cannot open scp: {}", error);
+                logger::warn("sftp", "copy", &error_message);
+                Err(error_message)
             }
-        }
+        },
 
         Err(error) => {
             logger::warn("sftp", "copy", &error);
