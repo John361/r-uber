@@ -1,3 +1,4 @@
+use std::fs;
 use std::path::Path;
 
 use crate::logger;
@@ -43,6 +44,18 @@ pub fn copy(input: &Path, output: &UberOutput) -> Result<bool, String> {
         _ => {
             let error_message: String = format!("Wrong output used with the method: {:?}", output);
             logger::warn("local", "copy", &error_message);
+            Err(error_message)
+        }
+    }
+}
+
+pub fn delete(path: &Path) -> Result<bool, String> {
+    match fs::remove_file(path) {
+        Ok(_) => Ok(true),
+
+        Err(_) => {
+            let error_message: String = format!("Cannot delete file: {:?}", path);
+            logger::warn("local", "delete", &error_message);
             Err(error_message)
         }
     }
