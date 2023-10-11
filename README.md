@@ -30,3 +30,23 @@ See schema in tools/schemas/races-schema.json
 ```
 RUST_LOG=Info cargo run --package r-uber --bin r-uber start -c full/path/to/r-uber/config.json
 ```
+
+# Production
+## Docker
+Get usable compose file from tools/docker folder or use your own
+
+## Config file
+Populate created file in /opt/r-uber or use another by modifying /etc/systemd/system/r-uber.service file
+Always use full paths
+
+## Races file
+See schema in tools/schemas/races-schema.json
+Always use full paths
+
+## Rust
+Download release, unzip it
+```
+bash init.sh
+systemctl status r-uber.service
+tail -f /var/log/r-uber/r-uber.log
+```
