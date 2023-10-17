@@ -33,4 +33,4 @@ jobs:
               with:
                   bin: r-uber
                   token: ${{ secrets.GITHUB_TOKEN }}
-                  asset: README.md
+                  asset: README.md,tools
