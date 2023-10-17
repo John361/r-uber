@@ -23,6 +23,8 @@ pub fn consume_uber(kafka_config: &ConfigKafka) {
                                         &message.passenger,
                                     );
                                 }
+
+                                message.uber.kick_passenger(&message.passenger);
                             }
 
                             Err(error) => {
