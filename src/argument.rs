@@ -1,10 +1,18 @@
+use thiserror::Error;
+
 #[derive(Debug)]
 pub struct Argument {
     pub config_path: String,
 }
 
+#[derive(Error, Debug)]
+pub enum ArgumentError {
+    #[error("Missing argument: {0}")]
+    MissingArgument(String),
+}
+
 impl Argument {
-    pub fn build() -> Result<Self, String> {
+    pub fn build() -> Result<Self, ArgumentError> {
         let cmd = clap::Command::new("r-uber")
             .bin_name("r-uber")
             .subcommand_required(true)
@@ -26,7 +34,7 @@ impl Argument {
                 config_path: config_path.as_path().display().to_string(),
             }),
 
-            None => Err("Missing config argument value".to_string()),
+            None => Err(ArgumentError::MissingArgument("config".to_string())),
         }
     }
 }
