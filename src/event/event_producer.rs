@@ -9,6 +9,7 @@ use notify::{Config, EventKind, RecommendedWatcher, RecursiveMode, Watcher};
 
 use crate::configuration::ConfigKafka;
 use crate::event::event_uber::EventUber;
+use crate::event::EventError;
 use crate::logger;
 use crate::race::races::Races;
 
@@ -83,7 +84,7 @@ pub fn listen_races(kafka_config: &ConfigKafka, races: &Races) {
     }
 }
 
-fn produce_message(kafka_config: &ConfigKafka, event: EventUber) -> Result<bool, String> {
+fn produce_message(kafka_config: &ConfigKafka, event: EventUber) -> Result<bool, EventError> {
     // https://github.com/kafka-rust/kafka-rust/issues/135#issuecomment-259823379
 
     let mut client: KafkaClient = KafkaClient::new(kafka_config.hosts.to_owned());
@@ -95,6 +96,7 @@ fn produce_message(kafka_config: &ConfigKafka, event: EventUber) -> Result<bool,
         {
             client
                 .load_metadata(&[kafka_config.topic.to_owned()])
+                .map_err(|error| EventError::Producer(error.to_string()))
                 .expect("Cannot load metadata");
         }
 
@@ -113,54 +115,27 @@ fn produce_message(kafka_config: &ConfigKafka, event: EventUber) -> Result<bool,
                 "produce_message",
                 "Kafka error with client",
             );
-            return Err("Kafka error with client".to_string());
+            return Err(EventError::Producer("Kafka error with client".to_string()));
         }
 
         thread::sleep(Duration::from_secs(1));
     }
 
-    let client_producer = Producer::from_client(client)
+    let mut producer = Producer::from_client(client)
         .with_ack_timeout(Duration::from_secs(1))
         .with_required_acks(RequiredAcks::One)
-        .create();
+        .create()
+        .map_err(|error| EventError::Producer(error.to_string()))?;
 
-    match client_producer {
-        Ok(mut producer) => match event.to_json_string() {
-            Ok(content) => {
-                let result = producer.send(&Record {
-                    topic: &kafka_config.topic,
-                    partition: -1,
-                    key: (),
-                    value: content,
-                });
+    let content = event.to_json_string()
+        .map_err(|error| EventError::Producer(error.to_string()))?;
 
-                match result {
-                    Ok(_) => {
-                        let success_message: String =
-                            format!("Successfully sent event for passenger {}", &event.passenger);
-                        logger::info("event_producer", "produce_message", &success_message);
-                        Ok(true)
-                    }
+    producer.send(&Record {
+        topic: &kafka_config.topic,
+        partition: -1,
+        key: (),
+        value: content,
+    }).map_err(|error| EventError::Producer(error.to_string()))?;
 
-                    Err(error) => {
-                        let error_message: String = format!("Cannot send event: {}", error);
-                        logger::error("event_producer", "produce_message", &error_message);
-                        Err(error_message)
-                    }
-                }
-            }
-
-            Err(error) => {
-                let error_message: String = format!("Error occurred with event: {}", error);
-                logger::error("event_producer", "produce_message", &error_message);
-                Err(error_message)
-            }
-        },
-
-        Err(error) => {
-            let error_message: String = format!("Cannot create event producer: {}", error);
-            logger::error("event_producer", "produce_message", &error_message);
-            Err(error_message)
-        }
-    }
+    Ok(true)
 }
