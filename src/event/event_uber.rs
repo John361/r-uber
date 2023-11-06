@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use serde_json::{from_str as serde_json_from_str, to_string as serde_json_to_string};
 
-use crate::logger;
+use crate::event::EventError;
 use crate::race::uber::Uber;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -11,27 +11,17 @@ pub struct EventUber {
 }
 
 impl EventUber {
-    pub fn to_json_string(&self) -> Result<String, String> {
-        match serde_json_to_string(self) {
-            Ok(content) => Ok(content),
+    pub fn to_json_string(&self) -> Result<String, EventError> {
+        let result = serde_json_to_string(self)
+            .map_err(|error| EventError::ReadOrParseEvent(error.to_string()))?;
 
-            Err(error) => {
-                let error_message = format!("Cannot convert EventUber to String: {}", error);
-                logger::warn("uber_event", "to_json_string", &error_message);
-                Err(error_message)
-            }
-        }
+        Ok(result)
     }
 
-    pub fn from_json_string(content: &str) -> Result<Self, String> {
-        match serde_json_from_str::<EventUber>(content) {
-            Ok(event_uber) => Ok(event_uber),
+    pub fn from_json_string(content: &str) -> Result<Self, EventError> {
+        let result = serde_json_from_str::<EventUber>(content)
+            .map_err(|error| EventError::ReadOrParseEvent(error.to_string()))?;
 
-            Err(error) => {
-                let error_message = format!("Cannot convert from string to EventUber: {}", error);
-                logger::warn("uber_event", "from_json_string", &error_message);
-                Err(error_message)
-            }
-        }
+        Ok(result)
     }
 }

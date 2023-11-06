@@ -1,5 +1,6 @@
 use config::Config;
 use serde::Deserialize;
+use thiserror::Error;
 
 use crate::logger;
 
@@ -17,38 +18,28 @@ pub struct ConfigKafka {
     pub topic: String,
 }
 
+#[derive(Error, Debug)]
+pub enum ConfigurationError {
+    #[error("Cannot parse configuration: {0}")]
+    CannotParse(String),
+}
+
 impl Configuration {
-    pub fn from_file(file_path: &str) -> Result<Self, String> {
+    pub fn from_file(file_path: &str) -> Result<Self, ConfigurationError> {
         let config = Config::builder()
             .add_source(config::File::with_name(file_path))
-            .build();
+            .build()
+            .map_err(|error| {
+                logger::error("configuration", "from_file", &error.to_string());
+                ConfigurationError::CannotParse(error.to_string())
+            })?;
 
-        match config {
-            Ok(config) => match config.try_deserialize::<Configuration>() {
-                Ok(configuration) => {
-                    logger::info(
-                        "configuration",
-                        "from_file",
-                        "Successfully parsed configuration file",
-                    );
-                    Ok(configuration)
-                }
-                Err(_) => {
-                    logger::error(
-                        "configuration",
-                        "from_file",
-                        "Cannot deserialize configuration file",
-                    );
-                    Err("Cannot deserialize configuration file".to_string())
-                }
-            },
+        let result = config.try_deserialize::<Configuration>().map_err(|error| {
+            logger::error("configuration", "from_file", &error.to_string());
+            ConfigurationError::CannotParse(error.to_string())
+        })?;
 
-            Err(error) => {
-                let error_message: String = format!("Cannot build configuration file: {}", error);
-                logger::error("configuration", "from_file", &error_message);
-                Err(error_message)
-            }
-        }
+        Ok(result)
     }
 }
 
@@ -59,6 +50,6 @@ mod tests {
     #[test]
     fn config_loaded_and_parsed() {
         let file_path: &str = "./tests/config.json";
-        let _result: Configuration = Configuration::from_file(file_path).expect("");
+        let _result: Configuration = Configuration::from_file(file_path).unwrap();
     }
 }
