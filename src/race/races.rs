@@ -4,6 +4,7 @@ use serde::Deserialize;
 use serde_json::from_str as serde_json_from_str;
 
 use crate::logger;
+use crate::race::RaceError;
 use crate::race::uber::Uber;
 
 #[derive(Deserialize, Debug)]
@@ -12,46 +13,28 @@ pub struct Races {
 }
 
 impl Races {
-    pub fn from_string(content: &str) -> Result<Self, String> {
-        match serde_json_from_str::<Races>(content) {
-            Ok(result) => {
-                logger::info(
-                    "races",
-                    "from_string",
-                    "Successfully convert races string to Races",
-                );
-                Ok(result)
-            }
+    pub fn from_string(content: &str) -> Result<Self, RaceError> {
+        let result = serde_json_from_str::<Races>(content)
+            .map_err(|error| RaceError::ReadOrParseRaces(error.to_string()))?;
 
-            Err(error) => {
-                let error_message: String =
-                    format!("Cannot convert from string to Races: {}", error);
-                logger::error("races", "from_string", &error_message);
-                Err(error_message)
-            }
-        }
+        logger::info(
+            "races",
+            "from_string",
+            "Successfully convert races string to Races",
+        );
+        Ok(result)
     }
 
-    pub fn from_file(file_path: &str) -> Result<Self, String> {
-        match fs::read_to_string(file_path) {
-            Ok(content) => match Races::from_string(&content) {
-                Ok(races) => {
-                    logger::info("races", "from_file", "Successfully load races from file");
-                    Ok(races)
-                }
+    pub fn from_file(file_path: &str) -> Result<Self, RaceError> {
+        let content = fs::read_to_string(file_path)
+            .map_err(|error| {
+                logger::error("races", "from_file", "Cannot read races");
+                RaceError::ReadOrParseRaces(error.to_string())
+            })?;
 
-                Err(error) => {
-                    logger::error("races", "from_file", &error);
-                    Err(error)
-                }
-            },
-
-            Err(error) => {
-                let error_message: String = format!("Cannot read file to string: {}", error);
-                logger::error("races", "from_file", &error_message);
-                Err(error_message)
-            }
-        }
+        let races = Races::from_string(&content)?;
+        logger::info("races", "from_file", "Successfully load races from file");
+        Ok(races)
     }
 
     pub fn has_uber_with_same_input_path(&self, other_path: &str) -> Option<&Uber> {
@@ -68,6 +51,6 @@ mod tests {
     #[test]
     fn races_loaded_and_parsed() {
         let file_path: &str = "./tests/races.json";
-        let _result: Races = Races::from_file(file_path).expect("");
+        let _result: Races = Races::from_file(file_path).unwrap();
     }
 }
