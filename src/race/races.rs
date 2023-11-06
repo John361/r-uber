@@ -4,8 +4,8 @@ use serde::Deserialize;
 use serde_json::from_str as serde_json_from_str;
 
 use crate::logger;
-use crate::race::RaceError;
 use crate::race::uber::Uber;
+use crate::race::RaceError;
 
 #[derive(Deserialize, Debug)]
 pub struct Races {
@@ -26,11 +26,10 @@ impl Races {
     }
 
     pub fn from_file(file_path: &str) -> Result<Self, RaceError> {
-        let content = fs::read_to_string(file_path)
-            .map_err(|error| {
-                logger::error("races", "from_file", "Cannot read races");
-                RaceError::ReadOrParseRaces(error.to_string())
-            })?;
+        let content = fs::read_to_string(file_path).map_err(|error| {
+            logger::error("races", "from_file", "Cannot read races");
+            RaceError::ReadOrParseRaces(error.to_string())
+        })?;
 
         let races = Races::from_string(&content)?;
         logger::info("races", "from_file", "Successfully load races from file");

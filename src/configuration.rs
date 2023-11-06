@@ -34,11 +34,10 @@ impl Configuration {
                 ConfigurationError::CannotParse(error.to_string())
             })?;
 
-        let result = config.try_deserialize::<Configuration>()
-            .map_err(|error| {
-                logger::error("configuration", "from_file", &error.to_string());
-                ConfigurationError::CannotParse(error.to_string())
-            })?;
+        let result = config.try_deserialize::<Configuration>().map_err(|error| {
+            logger::error("configuration", "from_file", &error.to_string());
+            ConfigurationError::CannotParse(error.to_string())
+        })?;
 
         Ok(result)
     }

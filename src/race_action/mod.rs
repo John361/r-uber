@@ -17,5 +17,5 @@ pub enum RaceActionError {
     #[error("Wrong output used with method")]
     WrongOutput,
     #[error("Error during session usage: {0}")]
-    SessionUsage(String)
+    SessionUsage(String),
 }

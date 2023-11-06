@@ -9,28 +9,25 @@ use crate::race::uber_output::{UberOutput, UberOutputSftpAuthenticationMethod};
 use crate::race_action::RaceActionError;
 
 pub fn copy(input: &Path, output: &UberOutput) -> Result<bool, RaceActionError> {
-    let session = create_ssh_session(output)
-        .map_err(|error| {
-            logger::warn("sftp", "copy", &error.to_string());
-            error
-        })?;
+    let session = create_ssh_session(output).map_err(|error| {
+        logger::warn("sftp", "copy", &error.to_string());
+        error
+    })?;
 
-    let scp = session.run_local().open_scp()
-        .map_err(|error| {
-            logger::warn("sftp", "copy",&error.to_string());
-            RaceActionError::SessionUsage(error.to_string())
-        })?;
+    let scp = session.run_local().open_scp().map_err(|error| {
+        logger::warn("sftp", "copy", &error.to_string());
+        RaceActionError::SessionUsage(error.to_string())
+    })?;
 
     match output {
         UberOutput::Sftp { remote_path, .. } => {
-            scp.upload(input, remote_path.as_ref())
-                .map_err(|error| {
-                    logger::warn("sftp", "copy", &error.to_string());
-                    RaceActionError::Copy {
-                        source_path: input.to_string_lossy().to_string(),
-                        destination: remote_path.to_string()
-                    }
-                })?;
+            scp.upload(input, remote_path.as_ref()).map_err(|error| {
+                logger::warn("sftp", "copy", &error.to_string());
+                RaceActionError::Copy {
+                    source_path: input.to_string_lossy().to_string(),
+                    destination: remote_path.to_string(),
+                }
+            })?;
 
             let success_message: String = format!(
                 "Successfully remotely copy file from {:?} to {}",
@@ -70,12 +67,12 @@ fn create_ssh_session(output: &UberOutput) -> Result<SessionConnector<TcpStream>
                     .connect(format!("{}:{}", host, port)),
             };
 
-            let session = session
-                .map_err(|error| RaceActionError::SessionUsage(error.to_string()))?;
+            let session =
+                session.map_err(|error| RaceActionError::SessionUsage(error.to_string()))?;
 
             Ok(session)
         }
 
-        _ => Err(RaceActionError::WrongOutput)
+        _ => Err(RaceActionError::WrongOutput),
     }
 }

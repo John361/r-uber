@@ -127,15 +127,18 @@ fn produce_message(kafka_config: &ConfigKafka, event: EventUber) -> Result<bool,
         .create()
         .map_err(|error| EventError::Producer(error.to_string()))?;
 
-    let content = event.to_json_string()
+    let content = event
+        .to_json_string()
         .map_err(|error| EventError::Producer(error.to_string()))?;
 
-    producer.send(&Record {
-        topic: &kafka_config.topic,
-        partition: -1,
-        key: (),
-        value: content,
-    }).map_err(|error| EventError::Producer(error.to_string()))?;
+    producer
+        .send(&Record {
+            topic: &kafka_config.topic,
+            partition: -1,
+            key: (),
+            value: content,
+        })
+        .map_err(|error| EventError::Producer(error.to_string()))?;
 
     Ok(true)
 }
