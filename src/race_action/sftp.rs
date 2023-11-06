@@ -6,49 +6,48 @@ use ssh::SessionConnector;
 
 use crate::logger;
 use crate::race::uber_output::{UberOutput, UberOutputSftpAuthenticationMethod};
+use crate::race_action::RaceActionError;
 
-pub fn copy(input: &Path, output: &UberOutput) -> Result<bool, String> {
-    match create_ssh_session(output) {
-        Ok(session) => match session.run_local().open_scp() {
-            Ok(scp) => match output {
-                UberOutput::Sftp { remote_path, .. } => {
-                    if let Err(error) = scp.upload(input, remote_path.as_ref()) {
-                        let error_message = format!("Cannot open scp: {}", error);
-                        logger::warn("sftp", "copy", &error_message);
-                        Err(error_message)
-                    } else {
-                        let success_message: String = format!(
-                            "Successfully remotely copy file from {:?} to {}",
-                            input, &remote_path
-                        );
-                        logger::info("local", "copy", &success_message);
-                        Ok(true)
+pub fn copy(input: &Path, output: &UberOutput) -> Result<bool, RaceActionError> {
+    let session = create_ssh_session(output)
+        .map_err(|error| {
+            logger::warn("sftp", "copy", &error.to_string());
+            error
+        })?;
+
+    let scp = session.run_local().open_scp()
+        .map_err(|error| {
+            logger::warn("sftp", "copy",&error.to_string());
+            RaceActionError::SessionUsage(error.to_string())
+        })?;
+
+    match output {
+        UberOutput::Sftp { remote_path, .. } => {
+            scp.upload(input, remote_path.as_ref())
+                .map_err(|error| {
+                    logger::warn("sftp", "copy", &error.to_string());
+                    RaceActionError::Copy {
+                        source_path: input.to_string_lossy().to_string(),
+                        destination: remote_path.to_string()
                     }
-                }
+                })?;
 
-                _ => {
-                    let error_message: String =
-                        format!("Wrong output used with the method: {:?}", output);
-                    logger::warn("sftp", "copy", &error_message);
-                    Err(error_message)
-                }
-            },
+            let success_message: String = format!(
+                "Successfully remotely copy file from {:?} to {}",
+                input, &remote_path
+            );
+            logger::info("local", "copy", &success_message);
+            Ok(true)
+        }
 
-            Err(error) => {
-                let error_message = format!("Cannot open scp: {}", error);
-                logger::warn("sftp", "copy", &error_message);
-                Err(error_message)
-            }
-        },
-
-        Err(error) => {
-            logger::warn("sftp", "copy", &error);
-            Err(error)
+        _ => {
+            logger::warn("sftp", "copy", "Wrong output used with method");
+            Err(RaceActionError::WrongOutput)
         }
     }
 }
 
-fn create_ssh_session(output: &UberOutput) -> Result<SessionConnector<TcpStream>, String> {
+fn create_ssh_session(output: &UberOutput) -> Result<SessionConnector<TcpStream>, RaceActionError> {
     match output {
         UberOutput::Sftp {
             host,
@@ -71,24 +70,12 @@ fn create_ssh_session(output: &UberOutput) -> Result<SessionConnector<TcpStream>
                     .connect(format!("{}:{}", host, port)),
             };
 
-            match session {
-                Ok(session) => Ok(session),
+            let session = session
+                .map_err(|error| RaceActionError::SessionUsage(error.to_string()))?;
 
-                Err(_) => {
-                    let error_message = format!(
-                        "Cannot open remote session for {} on {}:{}",
-                        login, host, port
-                    );
-                    logger::warn("sftp", "create_ssh_session", &error_message);
-                    Err(error_message)
-                }
-            }
+            Ok(session)
         }
 
-        _ => {
-            let error_message: String = format!("Wrong output used with the method: {:?}", output);
-            logger::warn("sftp", "create_ssh_session", &error_message);
-            Err(error_message)
-        }
+        _ => Err(RaceActionError::WrongOutput)
     }
 }
